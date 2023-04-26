@@ -31,7 +31,7 @@ C_V_I_predicted_GBM <- readRDS("C_V_I_predicted_GBM.RDS")
 
 Ecoregions <- readRDS("Ecoregions_shape_our_ecotype.RDS") 
 
-#Ecoregions_shape <- readRDS("Ecoregions_shape.RDS")
+Ecoregions_shape <- readRDS("Ecoregions_shape.RDS")
 
 RFE <- read.csv("Rfe_best_subset_imp.csv") %>% 
                            mutate(Groups = "Divergent")
@@ -93,9 +93,9 @@ ui <- fluidPage(
              from the study titled - 'Applying an interpretable machine learning 
              approach to assess intraspecific trait variation under landscape-scale 
              population differentiation', authored by Sambadi Majumder and 
-             Dr. Chase Mason (doi: https://doi.org/10.1101/2023.04.07.536012)."),
+             Dr. Chase Mason (doi: https://doi.org/10.1101/2023.04.07.536012).
              
-             p("This study used data from the HeliantHome database (Link: http://www.helianthome.org/), 
+             This study used data from the HeliantHome database (Link: http://www.helianthome.org/), 
              which is a public database of functional trait data for Helianthus annuus genotypes 
              (Bercovich et al., 2022) (doi: https://doi.org/10.1038/s41597-022-01842-0) 
              The genotypes used in this study were extracted from the database 
@@ -104,9 +104,9 @@ ui <- fluidPage(
              of each source population were cross-referenced with a shapefile of 
              Level I ecoregions sourced from the United States Environmental Protection 
              Agency (U.S. Environmental Protection Agency, 2010)
-             (https://www.epa.gov/eco-research/ecoregions-north-america)"),
+             (https://www.epa.gov/eco-research/ecoregions-north-america)
              
-             p("The 'Study Region' tab of the app shows the populations of Helianthus 
+             The 'Study Region' tab of the app shows the populations of Helianthus 
              annuus used in this study and in which ecoregion they are distributed. 
              The 'Divergent Traits' tab shows the traits that exhibit intraspecific 
              divergence between the Desert and Plains populations. These are the 
@@ -114,9 +114,19 @@ ui <- fluidPage(
              leaf economics, plant architecture, reproductive phenology, and floral 
              and seed morphology. The 'Impact of Divergence' tab shows accumulated 
              local effects plots that articulate how each divergent trait specifically 
-             impacts classification of an individual to Plains versus Desert."),
-              
-             p("This approach readily identifies traits predictive of ecoregion origin and the functional 
+             impacts classification of an individual to Plains versus Desert.
+             
+             The Random Forest and Gradient Boosting Machine classifiers were trained 
+             and validated using the functional trait data, and the results are visualized 
+             in the app. The 'Predictions' tab contains Geographic distribution maps, which 
+             visualize the number of genotypes per population that were correctly predicted 
+             by the best model (Gradient Boosting Machine classifier). Each facet represents 
+             populations where a given proportion of genotypes was correctly predicted, arranged 
+             in descending order – all genotypes correctly predicted, four out of five, three out 
+             of four, two out of three, one out of two, and one out of four. In no populations were 
+             zero genotypes correctly predicted by GBM.
+               
+             This approach readily identifies traits predictive of ecoregion origin and the functional 
              traits most likely to be responsible for contrasting ecological strategies across the landscape. 
              This type of approach can be used to parse large plant trait datasets in a wide range of contexts, 
              including explicitly testing the applicability of interspecific paradigms at intraspecific scales. 
@@ -124,7 +134,6 @@ ui <- fluidPage(
              divergence in Helianthus annuus."),
              
              h2("References"),
-             
              p("Bercovich N, N Genze, M Todesco, GL Owens, J-S Légaré, K Huang, LH Rieseberg, DG 
              Grimm 2022 HeliantHOME, a public and centralized database of phenotypic sunflower 
              data. Sci Data 9: 735.")
@@ -158,7 +167,12 @@ ui <- fluidPage(
                                   choices = unique(ALE$Trait)))
              ),
              plotlyOutput("ALE")
-    )
+    ),
+    
+    tabPanel("Predictions",
+             plotlyOutput("Predictions",
+                          height = "600px")
+    ),
   )
 )
   
@@ -233,7 +247,30 @@ server <- function(input,output,session){
     ggplotly(p3)
     
   }) 
-
+  
+  output$Predictions <- renderPlotly({
+    
+    p4 <- ggplot() +
+      geom_sf(data = Ecoregions_shape,
+              mapping = aes(color=Ecoregions)) +
+      geom_sf(data = C_V_I_predicted_GBM,
+              aes(text = str_c(population_id," "))) +
+      coord_sf(datum = st_crs(C_V_I_predicted_GBM)) +
+      facet_wrap(~Prop_correct) +
+      labs(x='Longitude',
+           y='Latitude') +
+      theme(plot.title = element_text(face = "bold")) +
+      theme(panel.background = element_blank()) +
+      theme(text = element_text(size = 10)) +
+      theme(axis.title.x = element_blank(),
+            axis.title.y = element_blank()) 
+    
+    ggplotly(p4)
+    
+  })
+  
+  
+  
 }
 
 
