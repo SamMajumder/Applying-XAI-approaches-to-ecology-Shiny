@@ -24,7 +24,7 @@ Displays a map of Helianthus annuus populations' distribution within the Great P
 ### Divergent Traits 🔍
 Reveals traits exhibiting divergence between the Desert and Plains populations, highlighting those most predictive of ecoregion.
 
-![Divergent Traits Screenshot](path_to_divergent_traits_screenshot.png)
+![Divergent Traits Screenshot](https://github.com/SamMajumder/Applying-XAI-approaches-to-ecology-Shiny/blob/main/Screenshot%20(33).png)
 
 ### Impacts on Divergence 🔬
 Shows accumulated local effects plots articulating the impact of each divergent trait on ecoregion classification.
