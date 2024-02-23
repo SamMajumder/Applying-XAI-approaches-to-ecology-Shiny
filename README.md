@@ -29,7 +29,7 @@ Reveals traits exhibiting divergence between the Desert and Plains populations, 
 ### Impacts on Divergence 🔬
 Shows accumulated local effects plots articulating the impact of each divergent trait on ecoregion classification.
 
-![Impacts on Divergence Screenshot](path_to_impacts_on_divergence_screenshot.png)
+![Impacts on Divergence Screenshot](https://github.com/SamMajumder/Applying-XAI-approaches-to-ecology-Shiny/blob/main/Screenshot%20(35).png)
 
 ## Research and Application 🧬
 Demonstrates an interpretable machine learning approach for identifying ecoregion-predictive traits, essential for ecological strategy research in Helianthus annuus.
