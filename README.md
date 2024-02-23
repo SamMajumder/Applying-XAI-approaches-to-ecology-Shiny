@@ -19,7 +19,7 @@ The functional trait data is from the [HeliantHome database](http://www.helianth
 ### Study Region 📍
 Displays a map of Helianthus annuus populations' distribution within the Great Plains and North American Deserts ecoregions.
 
-![Study Region Screenshot](path_to_study_region_screenshot.png)
+![Study Region Screenshot](https://github.com/SamMajumder/Applying-XAI-approaches-to-ecology-Shiny/blob/main/Screenshot%20(32).png)
 
 ### Divergent Traits 🔍
 Reveals traits exhibiting divergence between the Desert and Plains populations, highlighting those most predictive of ecoregion.
