@@ -1,11 +1,3 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
 
 library(shiny)
 library(tidyverse)
@@ -14,6 +6,7 @@ library(sf)
 library(ggplot2)
 library(plotly)
 library(RColorBrewer)
+library(leaflet)
 
 ### Load the datasets ### 
 
@@ -37,6 +30,13 @@ RFE <- read.csv("Rfe_best_subset_imp.csv") %>%
                            mutate(Groups = "Divergent")
 
 Study_ecoregions_sf <- readRDS("Study_ecoregions_sf.RDS")
+
+
+# Transform CRS outside the render function
+Ecoregions <- st_transform(Ecoregions, crs = 4326)
+Study_ecoregions_sf <- st_transform(Study_ecoregions_sf, crs = 4326)
+
+
 
 ### Binding the RFE and Boruta 
 
@@ -132,8 +132,7 @@ ui <- fluidPage(
              ),
     
     tabPanel("Study Region",
-             plotlyOutput("Study_Region",
-                          height = "600px")), 
+             leafletOutput("Study_Region_Map", height = "600px")), 
     
     tabPanel("Divergent Traits",
              ## Hierarchical dropdowns #####
@@ -167,26 +166,42 @@ ui <- fluidPage(
   
 server <- function(input,output,session){ 
   
-  output$Study_Region <- renderPlotly({
+  # Check unique values in Ecoregion column
+  observe({
+    print(unique(Ecoregions$Ecoregion))
+  })
+  
+  # Define color palette
+  ecoregion_colors <- colorFactor(c("red", "blue"), domain = unique(Ecoregions$Ecoregion))
+  
+  
+  output$Study_Region_Map <- renderLeaflet({ 
     
-   p1 <-  ggplot() +
-      geom_sf(data = Ecoregions, 
-              mapping = aes(fill = Ecoregion)) + 
-      geom_sf(data = Study_ecoregions_sf,
-              aes(text = str_c(population_id," "))) + 
-      coord_sf(datum = st_crs(Study_ecoregions_sf)) +
-      labs(x='Longitude',
-           y='Latitude') +
-      theme(plot.title = element_text(face = "bold")) +
-      theme(panel.background = element_blank()) +
-      theme(text = element_text(size = 10)) +
-      theme(axis.title.x = element_blank(),
-            axis.title.y = element_blank())
+    # Create a leaflet map
+    m <- leaflet() %>%
+      addTiles() %>% # Add default OpenStreetMap tiles
+      addPolygons(data = Ecoregions, 
+                  fillColor = ~ecoregion_colors(Ecoregion), 
+                  fillOpacity = 0.2, 
+                  weight = 1, color = "black",
+                  label = ~as.character(Ecoregion)) %>% # Add labels for interactivity 
+      addCircleMarkers(data = Study_ecoregions_sf, radius = 5, 
+                       color = ~ecoregion_colors(Ecoregions), 
+                       fillColor = ~ecoregion_colors(Ecoregions), 
+                       fillOpacity = 1, 
+                       stroke = FALSE,
+                       popup = ~as.character(population_id)) %>% # Make points interactive with popups
+      addLegend("bottomright", pal = ecoregion_colors, 
+                values = unique(Ecoregions$Ecoregion), 
+                title = "Ecoregion") # Add legend
     
+    # Return the map
+    m
+  
     
-   ggplotly(p1)
-    
-  }) 
+  })
+  
+  
   
   output$Importance_plot <- renderPlotly({
     
